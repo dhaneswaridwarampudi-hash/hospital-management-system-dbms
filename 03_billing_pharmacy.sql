@@ -73,16 +73,52 @@ CREATE TABLE payments (
     FOREIGN KEY (bill_id) REFERENCES bills(bill_id) ON DELETE CASCADE
 );
 
--- Sample Data Insertions
-INSERT INTO patients (first_name, last_name) VALUES ('John', 'Doe');
-INSERT INTO doctors (first_name, last_name, specialization) VALUES ('Jane', 'Smith', 'Cardiology');
-INSERT INTO appointments (patient_id, doctor_id) VALUES (1, 1);
+-- Sample Data Insertions & Extended Test Rows
+INSERT INTO patients (first_name, last_name) VALUES 
+    ('John', 'Doe'), 
+    ('Jane', 'Smith'),
+    ('Alice', 'Johnson');
 
-INSERT INTO medicines (medicine_name, unit_price, stock_quantity) 
-VALUES ('Paracetamol 500mg', 5.00, 100), ('Amoxicillin 250mg', 12.50, 50);
+INSERT INTO doctors (first_name, last_name, specialization) VALUES 
+    ('Dr. House', 'Diagnostics'), 
+    ('Dr. Watson', 'General Practice');
 
-INSERT INTO bills (patient_id, appointment_id, doctor_fee, room_charges, medicine_charges, status) 
-VALUES (1, 1, 100.00, 50.00, 17.50, 'Paid');
+INSERT INTO appointments (patient_id, doctor_id, appointment_date) VALUES 
+    (1, 1, '2026-03-01 10:00:00'), 
+    (2, 2, '2026-03-02 11:30:00');
 
-INSERT INTO payments (bill_id, amount_paid, payment_method) 
-VALUES (1, 167.50, 'Card');
+-- Appointment ID set to NULL for walk-in prescription/bill scenario
+INSERT INTO appointments (patient_id, doctor_id, appointment_date) VALUES 
+    (3, 1, NULL);
+
+INSERT INTO medicines (medicine_name, unit_price, stock_quantity) VALUES 
+    ('Paracetamol 500mg', 5.00, 100), 
+    ('Amoxicillin 250mg', 12.50, 50),
+    ('Ibuprofen 400mg', 8.00, 75);
+
+-- Prescriptions (including one with appointment_id explicitly set to NULL)
+INSERT INTO prescriptions (patient_id, doctor_id, appointment_id) VALUES 
+    (1, 1, 1), 
+    (2, 2, 2);
+
+INSERT INTO prescriptions (patient_id, doctor_id, appointment_id) VALUES 
+    (3, 1, NULL); -- Walk-in prescription without tied appointment
+
+INSERT INTO prescription_items (prescription_id, medicine_id, quantity, dosage) VALUES 
+    (1, 1, 20, '1 tablet thrice a day'), 
+    (2, 2, 10, '1 tablet twice a day'),
+    (3, 3, 15, 'As needed for pain');
+
+-- Bills (handling optional appointment_id as NULL)
+INSERT INTO bills (patient_id, appointment_id, doctor_fee, room_charges, medicine_charges, status) VALUES 
+    (1, 1, 100.00, 50.00, 100.00, 'Paid'), 
+    (2, 2, 150.00, 0.00, 125.00, 'Unpaid');
+
+-- Bill for patient 3 without an appointment reference
+INSERT INTO bills (patient_id, appointment_id, doctor_fee, room_charges, medicine_charges, status) VALUES 
+    (3, NULL, 75.00, 0.00, 120.00, 'Paid');
+
+-- Payments recorded for paid bills
+INSERT INTO payments (bill_id, amount_paid, payment_method) VALUES 
+    (1, 250.00, 'Card'),
+    (3, 195.00, 'UPI');
