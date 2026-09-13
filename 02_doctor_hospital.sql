@@ -38,22 +38,33 @@ CREATE TABLE rooms (
     status ENUM('Available', 'Occupied', 'Maintenance') DEFAULT 'Available'
 );
 
--- Insert Sample Data
+-- Insert Sample Data & Extra Rows handling Nulls/Optional Fields
 INSERT INTO departments (department_name, building_floor) VALUES 
-('Cardiology', 2), 
-('Neurology', 3), 
-('Pediatrics', 1);
+    ('Cardiology', 2), 
+    ('Neurology', 3), 
+    ('Pediatrics', 1),
+    ('Orthopedics', 4);
 
 INSERT INTO doctors (first_name, last_name, department_id, specialization, phone, email) VALUES 
-('Robert', 'Chen', 1, 'Cardiologist', '9876500001', 'dr.robert@hospital.com'),
-('Sarah', 'Jenkins', 2, 'Neurologist', '9876500002', 'dr.sarah@hospital.com');
+    ('Robert', 'Chen', 1, 'Cardiologist', '9876500001', 'dr.robert@hospital.com'), 
+    ('Sarah', 'Jenkins', 2, 'Neurologist', '9876500002', 'dr.sarah@hospital.com');
+
+-- Doctor with optional email explicitly set to NULL
+INSERT INTO doctors (first_name, last_name, department_id, specialization, phone, email) VALUES 
+    ('Michael', 'Vance', 3, 'Pediatrician', '9876500003', NULL);
+
+-- Doctor with department_id set to NULL (allowed via ON DELETE SET NULL / nullable foreign key)
+INSERT INTO doctors (first_name, last_name, department_id, specialization, phone, email) VALUES 
+    ('Emily', 'Davis', NULL, 'General Practitioner', '9876500004', 'dr.emily@hospital.com');
 
 INSERT INTO doctor_schedules (doctor_id, day_of_week, start_time, end_time) VALUES 
-(1, 'Monday', '09:00:00', '17:00:00'),
-(1, 'Wednesday', '09:00:00', '17:00:00'),
-(2, 'Tuesday', '10:00:00', '16:00:00');
+    (1, 'Monday', '09:00:00', '17:00:00'), 
+    (1, 'Wednesday', '09:00:00', '17:00:00'), 
+    (2, 'Tuesday', '10:00:00', '16:00:00'),
+    (3, 'Thursday', '08:30:00', '14:30:00');
 
 INSERT INTO rooms (room_number, room_type, daily_rate, status) VALUES 
-('101-A', 'General', 50.00, 'Available'),
-('201-B', 'Private', 150.00, 'Occupied'),
-('ICU-01', 'ICU', 300.00, 'Available');
+    ('101-A', 'General', 50.00, 'Available'), 
+    ('201-B', 'Private', 150.00, 'Occupied'), 
+    ('ICU-01', 'ICU', 300.00, 'Available'),
+    ('302-C', 'General', 60.00, 'Maintenance');
