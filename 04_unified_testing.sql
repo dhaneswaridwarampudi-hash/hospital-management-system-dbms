@@ -1,18 +1,18 @@
 -- Unified Cross-Module Test: Connecting Patients, Appointments, and Bills
--- Using LEFT JOINs to properly accommodate and display NULL relationships (e.g., walk-in bills or unbilled appointments)
+-- Fixed to properly show walk-in bills even if an appointment doesn't exist
 
 SELECT 
     p.patient_id, 
     CONCAT(p.first_name, ' ', p.last_name) AS patient_name, 
     p.phone, 
-    COALESCE(a.appointment_id, 'No Appointment') AS appointment_id, 
-    COALESCE(CAST(a.appointment_date AS CHAR), 'Walk-in / N/A') AS appointment_date, 
+    COALESCE(CAST(a.appointment_id AS CHAR), 'No Appointment') AS appointment_id, 
+    COALESCE(CONCAT(CAST(a.appointment_date AS CHAR), ' ', CAST(a.appointment_time AS CHAR)), 'Walk-in / N/A') AS appointment_timestamp, 
     COALESCE(a.status, 'N/A') AS appointment_status, 
     COALESCE(b.total_amount, 0.00) AS total_amount, 
     COALESCE(b.status, 'No Bill Generated') AS bill_status
 FROM patients p
 LEFT JOIN appointments a ON p.patient_id = a.patient_id
-LEFT JOIN bills b ON a.appointment_id = b.appointment_id;
+LEFT JOIN bills b ON p.patient_id = b.patient_id AND (a.appointment_id = b.appointment_id OR b.appointment_id IS NULL);
 
 -- Additional Unified View: Doctor, Department, and Schedule Mapping
 -- Safely handling doctors with NULL departments (e.g., general float staff)
